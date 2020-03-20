@@ -1,7 +1,6 @@
 // Format UDP message according to statsd protocol
 void sendMeasure(char* m_name, float m_value) {
   char m_entry[126];
-  int m_value_int, m_value_dec;
 
   // "sensor.<measure_name>:<measure_value>|g|#<dimension_name>:<dimension_value>,..."
   Udp.beginPacket(splunk_ip, STATSD_PORT_NUMBER);
@@ -14,12 +13,8 @@ void sendMeasure(char* m_name, float m_value) {
   Udp.print(",board_type:mkr1010,sensor_type:mkr_env");
   Udp.endPacket();
 
-  // Separate integer and decimal part of a float
-  m_value_int = m_value;
-  m_value_dec = (m_value - m_value_int) * 100.0;
-
   // Format measure for file storage: timestamp measure_name=measure_value
-  sprintf(m_entry, "20%02d-%02d-%02d %02d:%02d:%02d.000,%s=%d.%02d", rtc.getYear(), rtc.getMonth(), rtc.getDay(), rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), m_name, m_value_int, m_value_dec);
+  sprintf(m_entry, "20%02d-%02d-%02d %02d:%02d:%02d.000,%s=%.2f", rtc.getYear(), rtc.getMonth(), rtc.getDay(), rtc.getHours(), rtc.getMinutes(), rtc.getSeconds(), m_name, m_value);
   //  Write to disk
   write2file( m_entry, "csv");
 }
@@ -49,7 +44,7 @@ void write2file( char * entry, char * file_extension ) {
   char filename[FILENAME_LENGTH];
 
   // Build filename as being today's date:followed by specified extension YYYYMMDD.file_extension
-  sprintf(filename, "20%02d%02d%02d.%s", rtc.getYear(), rtc.getMonth(), rtc.getDay(), file_extension);
+  sprintf(filename, "20%02d%02d%02d.%3s", rtc.getYear(), rtc.getMonth(), rtc.getDay(), file_extension);
 
   if (SD.begin(chipSelect)) { // SD card available
     sdcard_file = SD.open(filename, FILE_WRITE);
