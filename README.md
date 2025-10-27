@@ -6,9 +6,11 @@ Arduino-based environmental monitoring system with multiple sensors, sending dat
 
 - **Board**: Arduino MKR WiFi 1010
 - **Sensors**:
-  - MKR ENV Shield (temperature, humidity, pressure, light, UV)
-  - Grove Air Quality Sensor (analog input A0)
+  - MKR ENV Shield (temperature, humidity, pressure, light, UV) - **Required**
+  - Grove Air Quality Sensor (analog input A0) - **Optional**
 - **Storage**: SD Card (optional, for local logging)
+
+> **Note**: The Air Quality sensor is optional. See [INSTALL.md](INSTALL.md) for details.
 
 ## Features
 
@@ -43,14 +45,19 @@ See [REFACTORING.md](REFACTORING.md) for detailed documentation.
 
 ## Setup
 
-1. Install required libraries:
+See [INSTALL.md](INSTALL.md) for detailed installation instructions.
+
+**Quick setup**:
+
+1. Install required libraries via Arduino Library Manager:
    - WiFiNINA
    - Arduino_MKRENV
    - RTCZero
    - SD
-   - Air_Quality_Sensor (Grove)
 
-2. Configure credentials in `arduino_secrets.h`:
+2. Optional: Install Grove Air Quality Sensor library (or disable in SensorManager.h)
+
+3. Configure credentials in `arduino_secrets.h`:
    ```cpp
    #define SECRET_SSID "your-wifi-ssid"
    #define SECRET_PASS "your-wifi-password"
@@ -96,6 +103,7 @@ sensor.temperature:22.40|g|#board_id:AABBCCDDEEFF,board_type:mkr1010,sensor_type
 - `SensorManager.h/cpp` - Sensor abstraction
 - `Utils.h/cpp` - Utility functions
 - `arduino_secrets.h` - WiFi and server credentials (user-configured)
+- `INSTALL.md` - Installation guide and library setup
 - `TESTING.md` - Test procedures and validation
 - `REFACTORING.md` - Architecture documentation
 - `test_udp_receiver.py` - UDP packet validation tool

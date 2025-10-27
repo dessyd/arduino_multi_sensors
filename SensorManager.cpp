@@ -3,7 +3,10 @@
 SensorManager::SensorManager()
   : m_mkrEnvAvailable(false)
   , m_airQualityAvailable(false)
-  , m_airQualitySensor(AIR_QUALITY_PIN) {
+#ifdef USE_AIR_QUALITY_SENSOR
+  , m_airQualitySensor(AIR_QUALITY_PIN)
+#endif
+{
 }
 
 int SensorManager::detectAndInitialize() {
@@ -20,6 +23,7 @@ int SensorManager::detectAndInitialize() {
   }
 
   // Initialize Air Quality sensor (requires 20s warmup)
+#ifdef USE_AIR_QUALITY_SENSOR
   if (Serial) Serial.println(F("Waiting for Air Quality sensor to initialize (20s)..."));
   delay(AIR_QUALITY_INIT_TIME);
 
@@ -31,6 +35,10 @@ int SensorManager::detectAndInitialize() {
   } else {
     if (Serial) Serial.println(F("WARNING: Failed to initialize Air Quality sensor"));
   }
+#else
+  m_airQualityAvailable = false;
+  if (Serial) Serial.println(F("INFO: Air Quality sensor support not compiled (library not available)"));
+#endif
 
   return sensorCount;
 }
@@ -62,14 +70,17 @@ AirQualityData SensorManager::readAirQuality() {
     return data;
   }
 
+#ifdef USE_AIR_QUALITY_SENSOR
   data.slope = m_airQualitySensor.slope();
   data.value = m_airQualitySensor.getValue();
   data.isValid = true;
+#endif
 
   return data;
 }
 
 const char* SensorManager::getAirQualityDescription(int slope) {
+#ifdef USE_AIR_QUALITY_SENSOR
   switch (slope) {
     case AirQualitySensor::FORCE_SIGNAL:
       return "High pollution! Force signal active.";
@@ -82,9 +93,13 @@ const char* SensorManager::getAirQualityDescription(int slope) {
     default:
       return "Unknown air quality status";
   }
+#else
+  return "Air quality sensor not available";
+#endif
 }
 
 LogSeverity SensorManager::getAirQualitySeverity(int slope) {
+#ifdef USE_AIR_QUALITY_SENSOR
   switch (slope) {
     case AirQualitySensor::FORCE_SIGNAL:
       return SEV_CRITICAL;
@@ -97,4 +112,8 @@ LogSeverity SensorManager::getAirQualitySeverity(int slope) {
     default:
       return SEV_MEDIUM;
   }
+#else
+  (void)slope; // Suppress unused parameter warning
+  return SEV_INFO;
+#endif
 }
